@@ -1,25 +1,12 @@
 from smtplib import SMTP
 import os
 from dotenv import load_dotenv
-import requests
 from bs4 import BeautifulSoup
 import re
+from playwright.sync_api import sync_playwright
+from playwright_stealth import Stealth
 
 load_dotenv()
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9"
-}
-
-
-def get_soup(url):
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        return BeautifulSoup(response.content, 'html.parser')
-    except requests.exceptions.RequestException:
-        return None
 
 
 def emag_get_price(soup):
@@ -45,47 +32,86 @@ def amazon_get_price(soup):
     return None
 
 
+def altex_get_price_playwright(page):
+    try:
+        page.wait_for_timeout(4000)
+
+        price_container = page.query_selector('div.text-red-brand:has(.Price-int)')
+
+        if price_container:
+            full_text = price_container.inner_text()
+
+            price_clean = re.sub(r'[^\d,.]', '', full_text)
+            price_clean = price_clean.replace('.', '').replace(',', '.')
+
+            return float(price_clean)
+
+        return None
+
+    except Exception:
+        return None
+
+
 def process_data(file_path):
     with open(file_path, "r") as f:
         lines = f.readlines()
 
     alerts = []
 
-    for line in lines[1:]:
-        parts = line.strip().split()
-        if len(parts) != 3:
-            continue
+    with Stealth().use_sync(sync_playwright()) as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--disable-blink-features=AutomationControlled"]
+        )
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+        page = context.new_page()
 
-        email = parts[0]
-        link = parts[1]
+        for line in lines[1:]:
+            parts = line.strip().split()
+            if len(parts) != 3:
+                continue
 
-        try:
-            target_price = float(parts[2])
-        except ValueError:
-            continue
+            email = parts[0]
+            link = parts[1]
 
-        soup = get_soup(link)
-        if not soup:
-            continue
+            try:
+                target_price = float(parts[2])
+            except ValueError:
+                continue
 
-        current_price = None
-        if 'emag.ro' in link:
-            current_price = emag_get_price(soup)
-        elif 'amazon.it' in link:
-            current_price = amazon_get_price(soup)
+            current_price = None
 
-        if current_price is not None and current_price < target_price:
-            alerts.append((email, link))
+            try:
+                page.goto(link, wait_until="domcontentloaded", timeout=60000)
+
+                if 'altex.ro' in link:
+                    current_price = altex_get_price_playwright(page)
+                else:
+                    soup = BeautifulSoup(page.content(), 'html.parser')
+                    if 'emag.ro' in link:
+                        current_price = emag_get_price(soup)
+                    elif 'amazon.it' in link:
+                        current_price = amazon_get_price(soup)
+            except Exception:
+                continue
+
+            if current_price is not None and current_price < target_price:
+                alerts.append((email, link))
+
+        browser.close()
 
     if alerts:
         sender = os.getenv("EMAIL_ADDRESS")
         password = os.getenv("EMAIL_PASSWORD")
 
-        with SMTP('smtp.gmail.com', 587) as smtp:
-            smtp.starttls()
-            smtp.login(sender, password)
-            for recipient, product_link in alerts:
-                send_email(smtp, sender, recipient, product_link)
+        if sender and password:
+            with SMTP('smtp.gmail.com', 587) as smtp:
+                smtp.starttls()
+                smtp.login(sender, password)
+                for recipient, product_link in alerts:
+                    send_email(smtp, sender, recipient, product_link)
 
 
 def send_email(smtp_connection, sender, to_address, product_link):
@@ -96,7 +122,8 @@ def send_email(smtp_connection, sender, to_address, product_link):
 
 
 def main():
-    process_data("data.txt")
+    if os.path.exists("data.txt"):
+        process_data("data.txt")
 
 
 if __name__ == '__main__':
