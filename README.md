@@ -29,13 +29,12 @@ A Python-based price tracking tool for **eMAG**, **Amazon**, and **Altex**. It u
 
 4.  **Configure Environment Variables:**
     Create a `.env` file in the root directory based on `.env.example`:
-    * `EMAIL_ADDRESS`: Your Gmail address.
+    * `EMAIL_ADDRESS`: The Gmail from which the notifications will be sent.
     * `EMAIL_PASSWORD`: Your Google App Password.
 
 5.  **Prepare Tracking Data:**
-    Create a `data.txt` file (see `data.example.txt` for format):
-    * **Format:** `Email ProductLink TargetPrice`.
-    * **Example:** `alert@example.com https://www.emag.ro/example-product 150.00`.
+    Create a `data.txt` file (see `data.example.txt` for format).
+    The gmails from this file are the ones who want to be notified.
 
 ## Usage
 
