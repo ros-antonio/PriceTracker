@@ -92,7 +92,7 @@ def process_data(file_path):
                     soup = BeautifulSoup(page.content(), 'html.parser')
                     if 'emag.ro' in link:
                         current_price = emag_get_price(soup)
-                    elif 'amazon.it' in link:
+                    elif 'amazon' in link:
                         current_price = amazon_get_price(soup)
             except Exception:
                 continue
