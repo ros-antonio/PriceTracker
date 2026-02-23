@@ -31,6 +31,7 @@ A Python-based price tracking tool for **eMAG**, **Amazon**, and **Altex**. It u
     Create a `.env` file in the root directory based on `.env.example`:
     * `EMAIL_ADDRESS`: The Gmail from which the notifications will be sent.
     * `EMAIL_PASSWORD`: Your Google App Password.
+    * Tip: You cannot use your regular Gmail password here. You must generate a 16-character App Password from your Google Account security settings for the script to bypass Google's security blocks.
 
 5.  **Prepare Tracking Data:**
     Create a `data.txt` file (see `data.example.txt` for format).
