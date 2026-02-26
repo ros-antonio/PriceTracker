@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 from playwright.sync_api import Page
 
 def amazon_get_price(page: Page) -> float:
@@ -18,3 +19,10 @@ def amazon_get_price(page: Page) -> float:
         return float(price_str)
     except ValueError:
         raise ValueError(f"Conversia float a eșuat pentru: '{price_str}'")
+
+
+def amazon_get_stock(page: Page) -> Optional[str]:
+    stock_el = page.query_selector('#availability span')
+    if stock_el:
+        return stock_el.inner_text().strip()
+    return None

@@ -1,11 +1,11 @@
 import os
-from typing import Optional, List, TypedDict
+from typing import Optional, List
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Page, BrowserContext, Browser
 from playwright_stealth import Stealth
 from data import Alert, ProductEntry, FoundProduct
-from scrapers import emag_get_price, amazon_get_price, altex_get_price_playwright
+from scrapers import emag_get_price, emag_get_stock, amazon_get_price, amazon_get_stock, altex_get_price_playwright, altex_get_stock_playwright, pcgarage_get_price, pcgarage_get_stock
 from utils import send_mails, parse_entries
 from logs.logger import Logger
 
@@ -41,15 +41,22 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
 
                 if 'altex.ro' in entry['link']:
                     current_price = altex_get_price_playwright(page)
+                    current_stoc = altex_get_stock_playwright(page)
                     logger.log(f"DEBUG: {entry['tag']} cautare pe altex")
                 elif 'amazon' in entry['link']:
                     current_price = amazon_get_price(page)
+                    current_stoc = amazon_get_stock(page)
                     logger.log(f"DEBUG: {entry['tag']} cautare pe amazon")
                 else:
                     soup: BeautifulSoup = BeautifulSoup(page.content(), 'html.parser')
                     if 'emag.ro' in entry['link']:
                         current_price = emag_get_price(soup)
+                        current_stoc = emag_get_stock(soup)
                         logger.log(f"DEBUG: {entry['tag']} cautare pe emag")
+                    elif 'pcgarage.ro' in entry['link']:
+                        current_price = pcgarage_get_price(soup)
+                        current_stoc = pcgarage_get_stock(soup)
+                        logger.log(f"DEBUG: {entry['tag']} cautare pe pcgarage")
             except Exception as e:
                 print(f" Eroare la produsul {entry['tag']}: {e}")
                 if logger:
@@ -61,7 +68,7 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
                     alerts.append(Alert(email=entry['email'], link=entry['link']))
                     logger.log(f"DEBUG: pending mail for {entry['tag']} to {entry['email']}")
 
-                foundProduct = FoundProduct(entry["tag"], entry["link"], current_price)
+                foundProduct = FoundProduct(entry["tag"], entry["link"], current_price, stoc=current_stoc if current_stoc else "unknown")
                 logger.writeResult(str(foundProduct))
                 logger.log(f"INFO: s-a gasit si s-a scris pretul curent al produsului {entry['tag']}")
             else:

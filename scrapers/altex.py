@@ -21,3 +21,10 @@ def altex_get_price_playwright(page: Page) -> Optional[float]:
     except ValueError:
         raise ValueError(f"Conversia la float a esuat pentru {price_clean}")
 
+
+def altex_get_stock_playwright(page: Page) -> Optional[str]:
+    stock_el = page.query_selector('div.flex.items-center.text-13px.leading-tight')
+    if stock_el:
+        return stock_el.inner_text().strip()
+    return None
+
