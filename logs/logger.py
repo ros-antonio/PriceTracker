@@ -10,6 +10,7 @@ class Logger:
         self.logFilePath = logPath
 
     def init(self):
+        self.log("DEBUG: logger initialized")
         with open(self.outputFilePath, "a", encoding="utf-8") as f:
             f.write(f'\n\nResults from {datetime.now().strftime("%A, %d %B %Y at %H:%M")}:\n\n' + TABLE_BASE)
 

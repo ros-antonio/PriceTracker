@@ -41,12 +41,15 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
 
                 if 'altex.ro' in entry['link']:
                     current_price = altex_get_price_playwright(page)
+                    logger.log(f"DEBUG: {entry['tag']} cautare pe altex")
                 elif 'amazon' in entry['link']:
                     current_price = amazon_get_price(page)
+                    logger.log(f"DEBUG: {entry['tag']} cautare pe amazon")
                 else:
                     soup: BeautifulSoup = BeautifulSoup(page.content(), 'html.parser')
                     if 'emag.ro' in entry['link']:
                         current_price = emag_get_price(soup)
+                        logger.log(f"DEBUG: {entry['tag']} cautare pe emag")
             except Exception as e:
                 print(f" Eroare la produsul {entry['tag']}: {e}")
                 if logger:
@@ -56,9 +59,11 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
             if current_price is not None:
                 if entry['target_price'] != 0 and current_price < entry['target_price']:
                     alerts.append(Alert(email=entry['email'], link=entry['link']))
+                    logger.log(f"DEBUG: pending mail for {entry['tag']} to {entry['email']}")
 
                 foundProduct = FoundProduct(entry["tag"], entry["link"], current_price)
                 logger.writeResult(str(foundProduct))
+                logger.log(f"INFO: s-a gasit si s-a scris pretul curent al produsului {entry['tag']}")
             else:
                 print(f" Eroare la produsul {entry['tag']}: Nu o fost gasit pret")
                 logger.log(f"ERROR: produsul {entry['tag']} - Nu o fost gasit pret")
@@ -68,7 +73,10 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
     if alerts:
         sender: Optional[str] = os.getenv("EMAIL_ADDRESS")
         password: Optional[str] = os.getenv("EMAIL_PASSWORD")
-        send_mails(alerts, sender, password)
+        try:
+            send_mails(alerts, logger, sender, password)
+        except Exception as e:
+            logger.log(f"ERROR: {e}")
 
 
 
