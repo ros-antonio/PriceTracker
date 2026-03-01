@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Page, BrowserContext, Browser
 from playwright_stealth import Stealth
 from data import Alert, ProductEntry, FoundProduct
+from data.store import init_db, get_last_price, insert_price
+from enums import FoundPriceType
 from scrapers import emag_get_price, emag_get_stock, amazon_get_price, amazon_get_stock, altex_get_price_playwright, altex_get_stock_playwright, pcgarage_get_price, pcgarage_get_stock
 from utils import send_mails, parse_entries
 from logs.logger import Logger
@@ -68,7 +70,23 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
                     alerts.append(Alert(email=entry['email'], link=entry['link']))
                     logger.log(f"DEBUG: pending mail for {entry['tag']} to {entry['email']}")
 
-                foundProduct = FoundProduct(entry["tag"], entry["link"], current_price, stoc=current_stoc if current_stoc else "unknown")
+                last_price = get_last_price(entry['tag'])
+                if last_price is None:
+                    price_type = FoundPriceType.FIRST_PRICE_FOUND
+                    logger.log(f"INFO: {entry['tag']} - primul pret inregistrat: {int(current_price)} RON")
+                elif int(current_price) < last_price:
+                    price_type = FoundPriceType.LOWER_THAN_LAST
+                    logger.log(f"INFO: {entry['tag']} - pretul a scazut: {last_price} -> {int(current_price)} RON")
+                elif int(current_price) > last_price:
+                    price_type = FoundPriceType.HIGHER_THAN_LAST
+                    logger.log(f"INFO: {entry['tag']} - pretul a crescut: {last_price} -> {int(current_price)} RON")
+                else:
+                    price_type = FoundPriceType.EQUAL_TO_LAST
+                    logger.log(f"INFO: {entry['tag']} - pretul a ramas neschimbat: {int(current_price)} RON")
+
+                insert_price(entry['tag'], int(current_price))
+
+                foundProduct = FoundProduct(entry["tag"], entry["link"], current_price, foundPriceType=price_type, stoc=current_stoc if current_stoc else "unknown")
                 logger.writeResult(str(foundProduct))
                 logger.log(f"INFO: s-a gasit si s-a scris pretul curent al produsului {entry['tag']}")
             else:
@@ -92,6 +110,7 @@ def main() -> None:
 
     logger = Logger(resultsRawPath, "logs/runtime.log")
     if os.path.exists("data.json"):
+        init_db()
         logger.init()
         process_data("data.json", logger)
     else:
