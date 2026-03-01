@@ -14,3 +14,4 @@ toggle_startup.ps1
 *.spec
 build/
 dist/
+*.db
