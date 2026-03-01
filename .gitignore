@@ -5,3 +5,13 @@ __pycache__/
 venv/
 .venv/
 env/
+TODO*
+results.md
+data.json
+*.log
+setup_startup.ps1
+toggle_startup.ps1
+*.spec
+build/
+dist/
+*.db
