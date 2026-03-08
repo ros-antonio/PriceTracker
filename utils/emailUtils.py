@@ -6,7 +6,7 @@ from logs.logger import Logger
 
 def send_mails(alerts: List[Alert], logger: Logger, sender: Optional[str] = None, password: Optional[str] = None) -> None:
     if not sender or not password:
-        print("Eroare: Lipsesc credențialele de email din variabilele de mediu.")
+        logger.log("ERROR: Eroare: Lipsesc credențialele de email din variabilele de mediu.")
         return
         
     grouped_alerts = defaultdict(list)
