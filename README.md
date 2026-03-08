@@ -1,6 +1,6 @@
 # Price Tracker
 
-A Python-based price tracking tool for **eMAG**, **Amazon**, **Altex**. It uses **Playwright** with stealth features to bypass anti-bot protections and monitors price drops based on your target thresholds. The program also writes a .md tabelar file with current prices.
+A Python-based price tracking tool for **eMAG**, **Amazon**, **Altex**, **Expert Company**, **Cel**, **Optimus Digital**. It uses **Playwright** with stealth features to bypass anti-bot protections and monitors price drops based on your target thresholds. The program also writes a .md tabelar file with current prices.
 
 ## Setup and Installation
 
