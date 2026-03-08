@@ -7,7 +7,7 @@ from playwright_stealth import Stealth
 from data import Alert, ProductEntry, FoundProduct
 from data.store import init_db, get_last_price, insert_price
 from enums import FoundPriceType
-from scrapers import emag_get_price, emag_get_stock, amazon_get_price, amazon_get_stock, altex_get_price_playwright, altex_get_stock_playwright, pcgarage_get_price, pcgarage_get_stock
+from scrapers import emag_get_price, emag_get_stock, amazon_get_price, amazon_get_stock, altex_get_price_playwright, altex_get_stock_playwright, pcgarage_get_price, pcgarage_get_stock, expertcompany_get_price, expertcompany_get_stock, optimusdigital_get_price, optimusdigital_get_stock, cel_get_price, cel_get_stock
 from utils import send_mails, parse_entries
 from logs.logger import Logger
 
@@ -59,6 +59,18 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
                         current_price = pcgarage_get_price(soup)
                         current_stoc = pcgarage_get_stock(soup)
                         logger.log(f"DEBUG: {entry['tag']} cautare pe pcgarage")
+                    elif 'expertcompany.ro' in entry['link']:
+                        current_price = expertcompany_get_price(soup)
+                        current_stoc = expertcompany_get_stock(soup)
+                        logger.log(f"DEBUG: {entry['tag']} cautare pe expertcompany")
+                    elif 'optimusdigital.ro' in entry['link']:
+                        current_price = optimusdigital_get_price(soup)
+                        current_stoc = optimusdigital_get_stock(soup)
+                        logger.log(f"DEBUG: {entry['tag']} cautare pe optimusdigital")
+                    elif 'cel.ro' in entry['link']:
+                        current_price = cel_get_price(soup)
+                        current_stoc = cel_get_stock(soup)
+                        logger.log(f"DEBUG: {entry['tag']} cautare pe cel")
             except Exception as e:
                 print(f" Eroare la produsul {entry['tag']}: {e}")
                 if logger:

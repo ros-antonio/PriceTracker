@@ -239,6 +239,9 @@ class ProductCard(ctk.CTkFrame):
         if "emag.ro" in link: return "eMAG"
         if "pcgarage.ro" in link: return "PC Garage"
         if "amazon.com" in link: return "Amazon"
+        if "expertcompany.ro" in link: return "Expert Company"
+        if "optimusdigital.ro" in link: return "Optimus Digital"
+        if "cel.ro" in link: return "CEL.ro"
         return ""
 
 

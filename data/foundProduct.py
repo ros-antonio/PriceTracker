@@ -1,8 +1,10 @@
 from enums import FoundPriceType
 
 OUT_OF_STOCK_LIST = ["Stoc epuizat", "Nu este in stoc", "stoc epuizat", "nu este in stoc",
-                      "Stoc indisponibil", "stoc indisponibil", "out of stock", "Out of stock"]
-LIMITED_STOCK_LIST = ["Ultimul", "Ultimele", "expus", "ultimul", "ultimele", "expus", "Limitat", "limitat"]
+                      "Stoc indisponibil", "stoc indisponibil", "out of stock", "Out of stock", 
+                      "Acest produs nu mai este in stoc"]
+LIMITED_STOCK_LIST = ["Ultimul", "Ultimele", "expus", "ultimul", "ultimele", "expus", "Limitat", "limitat",
+                       "Last", "last"]
 
 class FoundProduct:
 
