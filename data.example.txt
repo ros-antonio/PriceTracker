@@ -1,3 +1,0 @@
-Email ProductLink TargetPrice
-test@example.com https://www.emag.ro/example-product 150.00
-alert@example.com https://www.amazon.it/example-product 25.50
