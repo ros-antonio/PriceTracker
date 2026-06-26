@@ -1,46 +1,54 @@
 # Price Tracker
 
-A Python-based price tracking tool for **eMAG**, **Amazon**, and **Altex**. It uses **Playwright** with stealth features to bypass anti-bot protections and monitors price drops based on your target thresholds.
+Tracks product prices from eMAG, Amazon, Altex, PC Garage, and CEL.
 
-## Setup and Installation
+The app reads products from `data.json`, scrapes current price and stock with
+Playwright, writes a markdown report, stores price history in SQLite, and sends
+grouped email alerts when a product drops below its target price.
 
- 1. Prerequisites
-* Ensure you have **Python 3.8+** installed on your system.
-* It is highly recommended to use a virtual environment:
-  ```bash
-  # Create a virtual environment
-  python -m venv .venv
+## Setup
 
-  # Activate it (Windows)
-  .venv\Scripts\activate
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+playwright install
+```
 
-  # Activate it (Mac/Linux)
-  source .venv/bin/activate
-  ```
+Create `.env`:
 
-2.  **Install Python Dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+```env
+EMAIL_ADDRESS=your_email@gmail.com
+EMAIL_PASSWORD=your_google_app_password
+OUTPUT_FILEPATH=results.md
+INPUT_FILEPATH=data.json
+```
 
-3.  **Install Playwright Browser Binaries:**
-    ```bash
-    playwright install
-    ```
+Create `data.json`:
 
-4.  **Configure Environment Variables:**
-    Create a `.env` file in the root directory based on `.env.example`:
-    * `EMAIL_ADDRESS`: The Gmail from which the notifications will be sent.
-    * `EMAIL_PASSWORD`: Your Google App Password.
-    * Tip: You cannot use your regular Gmail password here. You must generate a 16-character App Password from your Google Account security settings for the script to bypass Google's security blocks.
+```json
+[
+  {
+    "tag": "Monitor",
+    "email": "you@example.com",
+    "link": "https://www.emag.ro/example-product",
+    "target_price": 700
+  }
+]
+```
 
-5.  **Prepare Tracking Data:**
-    Create a `data.txt` file (see `data.example.txt` for format).
-    The gmails from this file are the ones who want to be notified.
+## Run
 
-## Usage
-
-Run the script manually to check current prices:
-```bash
+```powershell
 python main.py
 ```
+
+## Files
+
+- `data.json`: products to track.
+- `results.md`: latest markdown report.
+- `logs/runtime.log`: run log.
+- `data/prices.db`: SQLite price history, created automatically.
+
+`target_price` set to `0` disables email alerts for that product but still
+tracks and records its price.

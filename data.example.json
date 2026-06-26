@@ -1,0 +1,14 @@
+[
+  {
+    "tag": "Example eMAG product",
+    "email": "test@example.com",
+    "link": "https://www.emag.ro/example-product",
+    "target_price": 150.0
+  },
+  {
+    "tag": "Example Amazon product",
+    "email": "alert@example.com",
+    "link": "https://www.amazon.it/example-product",
+    "target_price": 25.5
+  }
+]
