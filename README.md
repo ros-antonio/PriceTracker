@@ -16,6 +16,7 @@ A Python-based price tracking tool for **eMAG**, **Amazon**, and **Altex**. It u
 
   # Activate it (Mac/Linux)
   source .venv/bin/activate
+  ```
 
 2.  **Install Python Dependencies:**
     ```bash
@@ -42,3 +43,4 @@ A Python-based price tracking tool for **eMAG**, **Amazon**, and **Altex**. It u
 Run the script manually to check current prices:
 ```bash
 python main.py
+```
