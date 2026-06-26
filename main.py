@@ -19,6 +19,13 @@ DEFAULT_LOG_FILE = "logs/runtime.log"
 DEFAULT_JSON_INPUT = "data.json"
 
 
+def env_flag_enabled(name: str, default: bool = True) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
     entries = parse_entries(input_file_path)
     alerts: List[Alert] = []
@@ -89,11 +96,14 @@ def process_data(input_file_path: str, logger: Optional[Logger] = None) -> None:
 
         browser.close()
 
-    send_mails(
-        alerts,
-        sender=os.getenv("EMAIL_ADDRESS"),
-        password=os.getenv("EMAIL_PASSWORD"),
-    )
+    if env_flag_enabled("SEND_EMAIL_ALERTS", default=True):
+        send_mails(
+            alerts,
+            sender=os.getenv("EMAIL_ADDRESS"),
+            password=os.getenv("EMAIL_PASSWORD"),
+        )
+    elif alerts:
+        logger.log(f"INFO: skipped {len(alerts)} email alert(s); SEND_EMAIL_ALERTS is disabled")
 
 
 def scrape_product(page, store: str) -> Tuple[Optional[float], Optional[str]]:

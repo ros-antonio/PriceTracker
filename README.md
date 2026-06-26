@@ -22,6 +22,7 @@ EMAIL_ADDRESS=your_email@gmail.com
 EMAIL_PASSWORD=your_google_app_password
 OUTPUT_FILEPATH=results.md
 INPUT_FILEPATH=data.json
+SEND_EMAIL_ALERTS=true
 ```
 
 Create `data.json`:
@@ -52,3 +53,6 @@ python main.py
 
 `target_price` set to `0` disables email alerts for that product but still
 tracks and records its price.
+
+Set `SEND_EMAIL_ALERTS=false` to update only `results.md`, logs, and SQLite
+without sending any emails.
